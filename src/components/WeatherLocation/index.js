@@ -1,7 +1,7 @@
 import React from 'react';
 import WeatherData from './components/WeatherData';
 import getApiUrlByLocation from '../../services/getApiUrlByLocation';
-
+import {Grid, CircularProgress} from '@material-ui/core';
 
 class WeatherLocation extends React.Component {
     constructor(props) {
@@ -10,15 +10,24 @@ class WeatherLocation extends React.Component {
             {
                 city:props.city,
                 icon: 'day-sunny',
-                temp: 25,
-                min: 18,
-                max: 28,
-                errorMessage: null
+                temp: 0,
+                min: 0,
+                max: 0,
+                errorMessage: null,
+                isLoading:false
             }
     }
     componentWillMount() {
+        this.setState({
+            isLoading:true
+        });
+
         const url = getApiUrlByLocation(this.props.city);
-        fetch(url).then(response => {
+        fetch(url)
+        .then(response => {
+            this.setState({
+                isLoading:false
+            });
             console.log(response);
             if(response.ok)
             {
@@ -47,18 +56,22 @@ class WeatherLocation extends React.Component {
     }
 
     render() {
-        return <div className="weather-location">
+        return <Grid>
         <div style={{display: this.state.errorMessage === null? 'none': 'block'}}>
                 <h2>{this.state.errorMessage}</h2>
         </div>
             <h2>{this.state.city}</h2>
-            <WeatherData
+            
+            {
+                (!this.state.isLoading)
+                ?<WeatherData                
                 temp={this.state.temp}
                 max={this.state.max}
                 min={this.state.min}
-                icon={this.state.icon}
-            />
-        </div>
+               icon={this.state.icon}/>
+               :<CircularProgress variant="indeterminate" size={80} color="secondary"></CircularProgress>
+            }    
+            </Grid>                   
     }
 }
 
